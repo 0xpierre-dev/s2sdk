@@ -24,6 +24,7 @@ class CCheckTransmitInfo;
 class CEntityInstance;
 class CChoreoComponent;
 class CNetworkSerializerClassInfo;
+struct NetMessageInfo_t;
 
 enum NetworkValidationMode_t
 {
@@ -46,29 +47,26 @@ typedef uint NetworkCategoryId;
 
 typedef CNetMessage *( *NetMessageAllocateFn )();
 
-struct NetMessageInfo_t
+abstract_class INetworkMessageInternal
 {
-	CUtlString m_szName;
-	NetMessageAllocateFn m_pfnAllocateMessage;
-	CUtlString m_szGroup;
-	NetworkMessageId m_MessageId;
-	int m_nCategories;
-	int m_unk002;
-	NetworkGroupId m_GroupId;
-	uint8 m_nDefaultBufferType : 5;
-	uint8 m_bCannotBeNetworked : 1;
-	uint8 m_bOkayToRedispatch : 1;
-	uint8 m_unk001 : 1; // Set for messages registered without a group (CSVCMsg_PacketEntities), excludes them from per-group message stats
+public:
+	virtual ~INetworkMessageInternal() = 0;
 
-	const char *GetUnscopedName() const { return m_szName.Get(); }
-	const char *GetGroupName() const { return m_szGroup.Get(); }
-	NetworkMessageId GetMessageId() const { return m_MessageId; }
-	int GetCategoryMask() const { return m_nCategories; }
-	NetworkGroupId GetGroupId() const { return m_GroupId; }
-	NetChannelBufType_t GetDefaultBufferType() const { return (NetChannelBufType_t)m_nDefaultBufferType; }
-	bool CannotBeNetworked() const { return m_bCannotBeNetworked; }
+	virtual const char *GetUnscopedName() = 0;
+	virtual NetMessageInfo_t *GetNetMessageInfo() = 0;
 
-	CNetMessage *AllocateMessage() const { return m_pfnAllocateMessage(); }
+	virtual void SetMessageId( NetworkMessageId nMessageId ) = 0;
+
+	virtual void AddCategoryMask( int nMask, bool ) = 0;
+
+	virtual void SwitchMode( NetworkValidationMode_t nMode ) = 0;
+
+	virtual CNetMessage *AllocateMessage() = 0;
+
+	// Calls to INetworkMessages::SerializeMessageInternal
+	virtual bool Serialize( bf_write &pBuf, const CNetMessage *pData ) = 0;
+	// Calls to INetworkMessages::UnserializeMessageInternal
+	virtual bool Unserialize( bf_read &pBuf, CNetMessage *pData ) = 0;
 };
 
 struct NetworkRecipientsFilter_t
