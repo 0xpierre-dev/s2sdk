@@ -1,2 +1,5 @@
 # Fix file encoding (dota)
 e4cf9ea19b876630bb965e6ca1dffd815e4c02a9
+
+# Add .gitattributes and normalize line endings
+7fd783778225b1d6d9fc39934fe71a3cff15e607
